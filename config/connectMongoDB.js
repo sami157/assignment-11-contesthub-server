@@ -11,14 +11,15 @@ const client = new MongoClient(uri, {
     }
 });
 
+const db = client.db('contestHubDB');
+const usersCollection = db.collection('users');
+
 const connectMongoDB = () => {
     async function run() {
         try {
             await client.connect();
             console.log('connected to MongoDB')
         } finally {
-            const db = client.db('zap_shift_db');
-            const usersCollection = db.collection('users');
         }
     }
     run().catch(console.dir);

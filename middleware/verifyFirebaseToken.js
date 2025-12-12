@@ -1,4 +1,8 @@
 const admin = require("firebase-admin");
+const serviceAccount = require("../admin-key.json");
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
 
 const verifyFirebaseToken = (usersCollection) => {
     return async (req, res, next) => {
@@ -6,26 +10,13 @@ const verifyFirebaseToken = (usersCollection) => {
             const authHeader = req.headers.authorization;
             const idToken = authHeader.split(" ")[1];
 
-            // Verify Firebase ID token
             const decoded = await admin.auth().verifyIdToken(idToken);
             const email = decoded.email;
 
             // Find user in DB
-            let user = await usersCollection.findOne({ email });
-
-            // Auto-create if missing
-            if (!user) {
-                const newUser = {
-                    email,
-                    role: "user",
-                    name: decoded.name || "",
-                    photo: decoded.picture || "",
-                };
-                await usersCollection.insertOne(newUser);
-                user = newUser;
-            }
-
+            const user = await usersCollection.findOne({ email });
             req.user = user;
+            console.log('all good');
             next();
         } catch (err) {
             console.error("Firebase auth error:", err);
