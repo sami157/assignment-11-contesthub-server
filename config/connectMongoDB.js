@@ -17,12 +17,17 @@ const connectMongoDB = () => {
             await client.connect();
             console.log('connected to MongoDB')
         } finally {
-
+            const db = client.db('zap_shift_db');
+            const usersCollection = db.collection('users');
         }
     }
     run().catch(console.dir);
 }
 
-module.exports = connectMongoDB
+module.exports = {
+    connectMongoDB,
+    db,
+    usersCollection
+}
 
 
