@@ -19,7 +19,6 @@ const connectMongoDB = () => {
     async function run() {
         try {
             await client.connect();
-            console.log('connected to MongoDB')
         } finally {
         }
     }

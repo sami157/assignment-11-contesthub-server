@@ -52,7 +52,6 @@ const createContest = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error creating contest:", error);
         res.status(500).json({ message: "Server error, please try again later" });
     }
 };
@@ -60,7 +59,6 @@ const createContest = async (req, res) => {
 const getContestsByCreator = async (req, res) => {
     try {
         const email = req.user.email; // token email, not from request directly
-        console.log(email);
 
         const contests = await contestsCollection
             .find({ creatorEmail: email })
@@ -74,8 +72,57 @@ const getContestsByCreator = async (req, res) => {
     }
 };
 
+const deleteContest = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({ message: "Contest ID is required" });
+        }
+
+        const result = await contestsCollection.deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: "Contest not found" });
+        }
+
+        res.status(200).json({ message: "Contest deleted successfully" });
+
+    } catch (error) {
+        console.error("Error deleting contest:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+const updateContest = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedData = req.body;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid contest ID" });
+        }
+
+        // Update the contest
+        const result = await contestsCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { ...updatedData, updatedAt: new Date() } }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ message: "Contest not found" });
+        }
+
+        res.status(200).json({ message: "Contest updated successfully" });
+    } catch (error) {
+        console.error("Error updating contest:", error);
+        res.status(500).json({ message: "Server error, please try again later" });
+    }
+};
 
 module.exports = {
     createContest,
-    getContestsByCreator
+    getContestsByCreator,
+    deleteContest,
+    updateContest
 };
