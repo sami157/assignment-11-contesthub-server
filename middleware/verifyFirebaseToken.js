@@ -8,18 +8,19 @@ const verifyFirebaseToken = (usersCollection) => {
     return async (req, res, next) => {
         try {
             const authHeader = req.headers.authorization;
-            const idToken = authHeader.split(" ")[1];
+            const idToken = authHeader?.split(" ")[1];
+
+            if (!idToken) {
+                res.json({message: 'Access token is required'})
+                return
+            }
 
             const decoded = await admin.auth().verifyIdToken(idToken);
             const email = decoded.email;
-
-            // Find user in DB
             const user = await usersCollection.findOne({ email });
             req.user = user;
-            console.log('all good');
             next();
         } catch (err) {
-            console.error("Firebase auth error:", err);
             res.status(403).json({ message: "Unauthorized" });
         }
     };

@@ -1,7 +1,7 @@
 const requireRole = (requiredRole) => {
     return (req, res, next) => {
         try {
-            const userRole = req.user.role;
+            const userRole = req.user?.role;
 
             if (userRole !== requiredRole) {
                 return res.status(403).json({ message: "You are not authorized" });

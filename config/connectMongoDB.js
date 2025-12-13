@@ -13,6 +13,7 @@ const client = new MongoClient(uri, {
 
 const db = client.db('contestHubDB');
 const usersCollection = db.collection('users');
+const contestsCollection = db.collection('contests');
 
 const connectMongoDB = () => {
     async function run() {
@@ -28,7 +29,8 @@ const connectMongoDB = () => {
 module.exports = {
     connectMongoDB,
     db,
-    usersCollection
+    usersCollection,
+    contestsCollection
 }
 
 
