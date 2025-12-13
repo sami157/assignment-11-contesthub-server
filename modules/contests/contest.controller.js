@@ -120,9 +120,20 @@ const updateContest = async (req, res) => {
     }
 };
 
+const getContests = async (req, res) => {
+    try {
+        const contests = await contestsCollection.find({}).toArray();
+        res.status(200).json(contests);
+    } catch (error) {
+        console.error("Error fetching contests:", error);
+        res.status(500).json({ message: "Server error, please try again later" });
+    }
+};
+
 module.exports = {
     createContest,
     getContestsByCreator,
     deleteContest,
-    updateContest
+    updateContest,
+    getContests
 };
