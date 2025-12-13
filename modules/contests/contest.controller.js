@@ -130,10 +130,36 @@ const getContests = async (req, res) => {
     }
 };
 
+const updateContestStatus = async (req, res) => {
+    try {
+        const { id } = req.params;        // contest _id
+        const { status } = req.body;      // new status
+
+        if (!status) {
+            return res.status(400).json({ message: "Status is required" });
+        }
+
+        const result = await contestsCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { status } }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ message: "Contest not found" });
+        }
+
+        res.json({ message: "Status updated successfully" });
+    } catch (error) {
+        console.error("Error updating contest status:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 module.exports = {
     createContest,
     getContestsByCreator,
     deleteContest,
     updateContest,
-    getContests
+    getContests,
+    updateContestStatus
 };
