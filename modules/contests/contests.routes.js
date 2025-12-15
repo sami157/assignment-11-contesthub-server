@@ -5,7 +5,7 @@ const { usersCollection } = require('../../config/connectMongoDB');
 const { requireRole } = require('../../middleware/requireRole');
 const { createContest, getContestsByCreator, deleteContest, updateContest, getContests, updateContestStatus } = require('./contest.controller');
 
-router.get('/', verifyFirebaseToken(usersCollection), requireRole('admin'), getContests)
+router.get('/', verifyFirebaseToken(usersCollection), getContests)
 router.post('/', verifyFirebaseToken(usersCollection), requireRole('creator'), createContest)
 router.get("/creator/:email", verifyFirebaseToken(usersCollection), requireRole('creator'), getContestsByCreator);
 router.delete("/delete/:id", verifyFirebaseToken(usersCollection), requireRole(['admin','creator']), deleteContest);
