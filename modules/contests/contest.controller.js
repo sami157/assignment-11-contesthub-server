@@ -41,6 +41,7 @@ const createContest = async (req, res) => {
             contestType,
             deadline: new Date(deadline),
             status: "pending",
+            participantCount: 0,
             createdAt: new Date(),
         };
 
@@ -145,6 +146,21 @@ const getApprovedContests = async (req, res) => {
     }
 };
 
+const getPopularContests = async (req, res) => {
+    try {
+        const contests = await contestsCollection
+            .find({ status: "confirmed" })
+            .sort({ participantsCount: -1 })
+            .limit(6)
+            .toArray();
+
+        res.status(200).json(contests);
+    } catch (error) {
+        console.error("Error fetching popular contests:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 
 const updateContestStatus = async (req, res) => {
     try {
@@ -178,5 +194,6 @@ module.exports = {
     updateContest,
     getContests,
     updateContestStatus,
-    getApprovedContests
+    getApprovedContests,
+    getPopularContests
 };
