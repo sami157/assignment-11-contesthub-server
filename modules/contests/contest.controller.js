@@ -130,6 +130,22 @@ const getContests = async (req, res) => {
     }
 };
 
+const getApprovedContests = async (req, res) => {
+    try {
+        const contests = await contestsCollection
+            .find({ status: "confirmed" })
+            .toArray();
+
+        res.status(200).json(contests);
+    } catch (error) {
+        console.error("Error fetching contests:", error);
+        res.status(500).json({
+            message: "Server error, please try again later",
+        });
+    }
+};
+
+
 const updateContestStatus = async (req, res) => {
     try {
         const { id } = req.params;        // contest _id
@@ -161,5 +177,6 @@ module.exports = {
     deleteContest,
     updateContest,
     getContests,
-    updateContestStatus
+    updateContestStatus,
+    getApprovedContests
 };
