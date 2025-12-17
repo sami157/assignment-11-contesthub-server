@@ -1,3 +1,4 @@
+const { registrationsCollection } = require("../../config/connectMongoDB");
 const stripe = require("../payment/stripe");
 
 const createCheckoutSession = async (req, res) => {
@@ -23,8 +24,8 @@ const createCheckoutSession = async (req, res) => {
                     quantity: 1,
                 },
             ],
-            success_url: `${process.env.CLIENT_URL}/payment-success?contestId=${contestId}`,
-            cancel_url: `${process.env.CLIENT_URL}/payment-cancel`,
+            success_url: `${process.env.CLIENT_URL}/payment-success`,
+            cancel_url: `${process.env.CLIENT_URL}`,
         });
 
         res.status(200).json({ url: session.url });
@@ -33,4 +34,50 @@ const createCheckoutSession = async (req, res) => {
     }
 };
 
-module.exports = { createCheckoutSession };
+const handlePaymentSuccess = async (req, res) => {
+    try {
+        const { session_id } = req.query;
+
+        if (!session_id) {
+            return res.status(400).json({ message: "Session ID missing" });
+        }
+
+        const session = await stripe.checkout.sessions.retrieve(session_id);
+
+        if (session.payment_status !== "paid") {
+            return res.status(400).json({ message: "Payment not completed" });
+        }
+
+        const contestId = session.metadata.contestId;
+        const userEmail = session.metadata.userEmail;
+
+        // prevent duplicate registration
+        const alreadyRegistered = await registrationsCollection.findOne({
+            contestId,
+            userEmail,
+        });
+
+        if (alreadyRegistered) {
+            return res.status(200).json({ message: "Already registered" });
+        }
+
+        await registrationsCollection.insertOne({
+            contestId,
+            userEmail,
+            paidAt: new Date(),
+        });
+
+        await contestsCollection.updateOne(
+            { _id: new ObjectId(contestId) },
+            { $inc: { participantCount: 1 } }
+        );
+
+        res.status(200).json({ message: "Payment successful & registered" });
+
+    } catch (error) {
+        console.error("Payment success error:", error);
+        res.status(500).json({ message: "Payment verification failed" });
+    }
+};
+
+module.exports = { createCheckoutSession, handlePaymentSuccess };
