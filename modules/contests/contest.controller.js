@@ -187,6 +187,29 @@ const updateContestStatus = async (req, res) => {
     }
 };
 
+const getContestById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid contest ID" });
+        }
+
+        const contest = await contestsCollection.findOne({
+            _id: new ObjectId(id),
+        });
+
+        if (!contest) {
+            return res.status(404).json({ message: "Contest not found" });
+        }
+
+        res.status(200).json(contest);
+    } catch (error) {
+        console.error("Error fetching contest by id:", error);
+        res.status(500).json({ message: "Server error, please try again later" });
+    }
+};
+
 module.exports = {
     createContest,
     getContestsByCreator,
@@ -195,5 +218,6 @@ module.exports = {
     getContests,
     updateContestStatus,
     getApprovedContests,
-    getPopularContests
+    getPopularContests,
+    getContestById
 };
