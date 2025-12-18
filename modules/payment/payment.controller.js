@@ -9,6 +9,8 @@ const createCheckoutSession = async (req, res) => {
             return res.status(400).json({ message: "Missing data" });
         }
 
+        const userEmail = req.user.email;
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             mode: "payment",
@@ -17,26 +19,31 @@ const createCheckoutSession = async (req, res) => {
                     price_data: {
                         currency: "usd",
                         product_data: {
-                            name: name,
+                            name,
                         },
                         unit_amount: Math.round(price * 100),
                     },
                     quantity: 1,
                 },
             ],
-            success_url: `${process.env.CLIENT_URL}/payment-success`,
+            metadata: {
+                contestId,
+                userEmail,
+            },
+            success_url: `${process.env.CLIENT_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.CLIENT_URL}`,
         });
-
         res.status(200).json({ url: session.url });
     } catch (error) {
+        console.error("Stripe session error:", error);
         res.status(500).json({ message: error.message });
     }
 };
 
+
 const handlePaymentSuccess = async (req, res) => {
     try {
-        const { session_id } = req.query;
+        const session_id = req.query.id;
 
         if (!session_id) {
             return res.status(400).json({ message: "Session ID missing" });
