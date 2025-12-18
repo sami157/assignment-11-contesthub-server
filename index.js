@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const userRoutes = require('./modules/users/users.routes');
 const contestRoutes = require('./modules/contests/contests.routes');
 const paymentRoutes = require('./modules/payment/payment.routes');
+const registrationRoutes = require('./modules/registrations/reg.routes')
 const { connectMongoDB } = require('./config/connectMongoDB');
 
 dotenv.config();
@@ -17,6 +18,8 @@ app.use(express.json());
 app.use('/users', userRoutes);
 app.use('/contests', contestRoutes);
 app.use("/payments", paymentRoutes);
+app.use("/registrations", registrationRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('Welcome to ContestHub API!');
