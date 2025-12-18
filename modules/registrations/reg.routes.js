@@ -5,6 +5,6 @@ const verifyFirebaseToken = require("../../middleware/verifyFirebaseToken");
 
 const router = express.Router();
 
-router.get("/registrations/check/:contestId", verifyFirebaseToken(usersCollection), checkRegistration)
+router.get("/check/:contestId", verifyFirebaseToken(usersCollection), checkRegistration)
 
 module.exports = router;

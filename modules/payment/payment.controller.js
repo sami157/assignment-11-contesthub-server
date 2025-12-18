@@ -1,4 +1,5 @@
-const { registrationsCollection } = require("../../config/connectMongoDB");
+const { ObjectId } = require("mongodb");
+const { registrationsCollection, contestsCollection } = require("../../config/connectMongoDB");
 const stripe = require("../payment/stripe");
 
 const createCheckoutSession = async (req, res) => {
