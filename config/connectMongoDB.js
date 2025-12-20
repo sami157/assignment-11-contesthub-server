@@ -15,6 +15,7 @@ const db = client.db('contestHubDB');
 const usersCollection = db.collection('users');
 const contestsCollection = db.collection('contests');
 const registrationsCollection = db.collection('registrations');
+const submissionsCollection = db.collection('submissions');
 
 const connectMongoDB = () => {
     async function run() {
@@ -31,7 +32,8 @@ module.exports = {
     db,
     usersCollection,
     contestsCollection,
-    registrationsCollection
+    registrationsCollection,
+    submissionsCollection
 }
 
 

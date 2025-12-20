@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb");
-const { contestsCollection } = require("../../config/connectMongoDB.js");
+const { contestsCollection, registrationsCollection, submissionsCollection } = require("../../config/connectMongoDB.js");
 
 const createContest = async (req, res) => {
     try {
@@ -210,6 +210,73 @@ const getContestById = async (req, res) => {
     }
 };
 
+
+const submitContestTask = async (req, res) => {
+    try {
+        const contestId = req.params.id;
+        const userEmail = req.user.email;
+        const { submission } = req.body;
+
+        if (!submission) {
+            return res.status(400).json({ message: "Submission is required" });
+        }
+
+        const contest = await contestsCollection.findOne({
+            _id: new ObjectId(contestId),
+        });
+
+        if (!contest) {
+            return res.status(404).json({ message: "Contest not found" });
+        }
+
+        if (new Date(contest.deadline) < new Date()) {
+            return res.status(400).json({ message: "Contest has ended" });
+        }
+
+        const registration = await registrationsCollection.findOne({
+            contestId,
+            userEmail,
+        });
+
+        if (!registration) {
+            return res
+                .status(403)
+                .json({ message: "You are not registered for this contest" });
+        }
+
+        const alreadySubmitted = await submissionsCollection.findOne({
+            contestId,
+            userEmail,
+        });
+
+        if (alreadySubmitted) {
+            return res
+                .status(400)
+                .json({ message: "Task already submitted" });
+        }
+
+        const submissionDoc = {
+            contestId,
+            userEmail,
+            submission,
+            submittedAt: new Date(),
+            status: "submitted",
+        };
+
+        await submissionsCollection.insertOne(submissionDoc);
+
+        res.status(201).json({
+            message: "Task submitted successfully",
+        });
+    } catch (error) {
+        console.error("Submit task error:", error);
+        res.status(500).json({
+            message: "Failed to submit task",
+        });
+    }
+};
+
+
 module.exports = {
     createContest,
     getContestsByCreator,
@@ -219,5 +286,6 @@ module.exports = {
     updateContestStatus,
     getApprovedContests,
     getPopularContests,
-    getContestById
+    getContestById,
+    submitContestTask
 };
