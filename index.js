@@ -5,6 +5,7 @@ const userRoutes = require('./modules/users/users.routes');
 const contestRoutes = require('./modules/contests/contests.routes');
 const paymentRoutes = require('./modules/payment/payment.routes');
 const registrationRoutes = require('./modules/registrations/reg.routes')
+const submissionRoutes = require('./modules/submissions/sub.routes')
 const { connectMongoDB } = require('./config/connectMongoDB');
 
 dotenv.config();
@@ -19,6 +20,7 @@ app.use('/users', userRoutes);
 app.use('/contests', contestRoutes);
 app.use("/payments", paymentRoutes);
 app.use("/registrations", registrationRoutes);
+app.use("/submissions", submissionRoutes);
 
 
 app.get('/', (req, res) => {
