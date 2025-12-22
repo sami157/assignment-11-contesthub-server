@@ -136,10 +136,13 @@ const getApprovedContests = async (req, res) => {
     try {
         const { page, limit, type, all } = req.query;
 
-        const filter = {};
+        const filter = {
+            status: 'confirmed'
+        };
         if (type && type !== "all") {
             filter.contestType = type;
         }
+
 
         if (all === "true") {
             const contests = await contestsCollection
@@ -186,7 +189,7 @@ const getPopularContests = async (req, res) => {
     try {
         const contests = await contestsCollection
             .find({ status: "confirmed" })
-            .sort({ participantsCount: -1 })
+            .sort({ participantCount: -1 })
             .limit(6)
             .toArray();
 
