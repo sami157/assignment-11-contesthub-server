@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb");
-const { db, usersCollection } = require("../../config/connectMongoDB.js")
+const { db, usersCollection, registrationsCollection, contestsCollection } = require("../../config/connectMongoDB.js")
 
 const createUser = async (req, res) => {
   const { name, email } = req.body;
@@ -88,10 +88,56 @@ const changeRole = async (req, res) => {
   }
 };
 
+const getUserStats = async (req, res) => {
+  try {
+    const userEmail = req.user.email;
+
+    const totalParticipated = await registrationsCollection.countDocuments({
+      userEmail
+    });
+
+    const totalWon = await contestsCollection.countDocuments({
+      "winner.userEmail": userEmail
+    });
+
+    res.status(200).json({
+      participated: totalParticipated,
+      won: totalWon,
+      winPercentage:
+        totalParticipated === 0
+          ? 0
+          : Math.round((totalWon / totalParticipated) * 100),
+    });
+
+  } catch (error) {
+    console.error("User stats error:", error);
+    res.status(500).json({ message: "Failed to load user stats" });
+  }
+}
+
+const getUserProfile = async (req, res) => {
+  try {
+    const userEmail = req.user.email;
+
+    const user = await usersCollection.findOne(
+      { email: userEmail },
+      { projection: { name: 1, photo: 1, bio: 1 } }
+    );
+
+    res.status(200).json(user);
+
+  } catch (error) {
+    res.status(500).json({ message: "Failed to load profile" });
+  }
+};
+
+
 module.exports = {
   createUser,
   getUsers, 
   changeRole,
-  getUserRole
+  getUserRole,
+  getUserStats,
+  getUserProfile
 };
 
